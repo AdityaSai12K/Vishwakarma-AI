@@ -763,7 +763,10 @@ h1, h2, h3, h4, h5, h6 {
 .btn-outline:hover {
   background-color: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
+  box-shadow: var(--shadow-glow);   
+  transform: translateY(-2px);   
 }
+
 
 .btn-gradient {
   background: var(--gradient-purple);
@@ -831,6 +834,17 @@ h1, h2, h3, h4, h5, h6 {
   background-color: hsl(var(--background) / 0.8);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Ensure navbar stays above hero overlays */
+nav.navbar {
+  position: relative;
+  z-index: 9999 !important;
+}
+
+.gradient-hero,
+.blueprint-pattern {
+  z-index: 1 !important;
 }
 
 .nav-link {
