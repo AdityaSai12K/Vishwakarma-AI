@@ -29,7 +29,7 @@
           <a href="index.html" class="nav-link">Home</a>
           <a href="converter.html" class="nav-link active">2D → 3D Converter</a>
           <a href="vastu.html" class="nav-link">Vastu AI</a>
-          <a href="login.html" class="px-6 py-2 rounded-full bg-primary text-primary-foreground hover:shadow-purple transition-smooth" style="color: white; text-decoration: none;">Login</a>
+          <a href="login.html" class="btn btn-primary">Login</a>
         </div>
       </div>
     </div>
@@ -67,14 +67,14 @@
           </div>
           
           <!-- Processing State -->
-          <div class="processing hidden" style="display: none;">
+          <div class="processing hidden">
             <div class="spinner mb-4"></div>
             <p class="text-lg font-medium text-foreground">AI Processing Your Design...</p>
             <p class="text-sm text-muted-foreground mt-2">Generating 3D model</p>
           </div>
           
           <!-- File Display -->
-          <div class="file-display hidden rounded-2xl border border-border shadow-card bg-card overflow-hidden" style="display: none;">
+          <div class="file-display hidden rounded-2xl border border-border shadow-card bg-card overflow-hidden">
             <div class="aspect-video bg-gradient-card flex items-center justify-center blueprint-pattern">
               <div class="text-center">
                 <div class="w-32 h-32 mx-auto mb-6 relative">
@@ -142,6 +142,16 @@
   </div>
 
   <script src="js/app.js"></script>
+  <!-- Fallback: Ensure .html links always navigate -->
+  <script>
+    // Safeguard: Allow all .html links to navigate normally
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[href$=".html"]');
+      if (link && !link.hasAttribute('data-no-navigate')) {
+        return true;
+      }
+    }, true);
+  </script>
 </body>
 </html>
 

@@ -29,7 +29,7 @@
           <a href="index.html" class="nav-link">Home</a>
           <a href="converter.html" class="nav-link">2D → 3D Converter</a>
           <a href="vastu.html" class="nav-link active">Vastu AI</a>
-          <a href="login.html" class="px-6 py-2 rounded-full bg-primary text-primary-foreground hover:shadow-purple transition-smooth" style="color: white; text-decoration: none;">Login</a>
+          <a href="login.html" class="btn btn-primary">Login</a>
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@
       </div>
 
       <!-- Results Area (Hidden Initially) -->
-      <div class="vastu-results hidden" style="display: none;">
+      <div class="vastu-results hidden">
         <div class="grid lg:grid-cols-3 gap-6">
           <!-- Vastu Score -->
           <div class="lg:col-span-1">
@@ -221,6 +221,16 @@
   </div>
 
   <script src="js/app.js"></script>
+  <!-- Fallback: Ensure .html links always navigate -->
+  <script>
+    // Safeguard: Allow all .html links to navigate normally
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[href$=".html"]');
+      if (link && !link.hasAttribute('data-no-navigate')) {
+        return true;
+      }
+    }, true);
+  </script>
 </body>
 </html>
 

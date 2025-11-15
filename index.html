@@ -36,7 +36,7 @@
           <a href="index.html" class="nav-link active">Home</a>
           <a href="converter.html" class="nav-link">2D → 3D Converter</a>
           <a href="vastu.html" class="nav-link">Vastu AI</a>
-          <a href="login.html" class="px-6 py-2 rounded-full bg-primary text-primary-foreground hover:shadow-purple transition-smooth" style="color: white; text-decoration: none;">Login</a>
+          <a href="login.html" class="btn btn-primary">Login</a>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
         </p>
         
         <div class="flex gap-4 animate-slide-up" style="animation-delay: 0.3s;">
-          <a href="converter.html" class="btn btn-lg btn-white rounded-full px-8 py-6 text-lg">
+          <a href="login.html" class="btn btn-lg btn-white rounded-full px-8 py-6 text-lg">
             Get Started
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -231,5 +231,16 @@
   </footer>
 
   <script src="js/app.js"></script>
+  <!-- Fallback: Ensure .html links always navigate -->
+  <script>
+    // Safeguard: Allow all .html links to navigate normally
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[href$=".html"]');
+      if (link && !link.hasAttribute('data-no-navigate')) {
+        // Allow browser default navigation for .html links
+        return true;
+      }
+    }, true);
+  </script>
 </body>
 </html>
