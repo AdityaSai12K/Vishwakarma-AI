@@ -1,28 +1,235 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VISHWAKARMA AI - AI-Powered 2D to 3D Architecture & Vastu Analysis</title>
-    <meta name="description" content="Transform 2D architectural plans into interactive 3D models with AI-powered Vastu compliance analysis. VISHWAKARMA AI bridges ancient wisdom with cutting-edge technology." />
-    <meta name="author" content="VISHWAKARMA AI" />
-
-    <meta property="og:title" content="VISHWAKARMA AI - AI Architecture Platform" />
-    <meta property="og:description" content="AI-powered 2D to 3D conversion and Vastu-compliant design intelligence for architects and homeowners" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@VishwakarmaAI" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISHWAKARMA AI - AI-Powered 2D to 3D Architecture & Vastu Analysis</title>
+  <meta name="description" content="Transform 2D architectural plans into interactive 3D models with AI-powered Vastu compliance analysis. VISHWAKARMA AI bridges ancient wisdom with cutting-edge technology.">
+  <meta name="author" content="VISHWAKARMA AI">
+  
+  <meta property="og:title" content="VISHWAKARMA AI - AI Architecture Platform">
+  <meta property="og:description" content="AI-powered 2D to 3D conversion and Vastu-compliant design intelligence for architects and homeowners">
+  <meta property="og:type" content="website">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-primary no-underline">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+          VISHWAKARMA AI
+        </a>
+        
+        <div class="flex items-center gap-8">
+          <a href="index.html" class="nav-link active">Home</a>
+          <a href="converter.html" class="nav-link">2D → 3D Converter</a>
+          <a href="vastu.html" class="nav-link">Vastu AI</a>
+          <a href="login.html" class="px-6 py-2 rounded-full bg-primary text-primary-foreground hover:shadow-purple transition-smooth" style="color: white; text-decoration: none;">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <!-- Animated Background -->
+    <div class="absolute inset-0 gradient-hero opacity-95"></div>
+    <div class="absolute inset-0 blueprint-pattern opacity-10"></div>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  </head>
+    <!-- Floating Circles -->
+    <div class="absolute top-20 left-10 w-64 h-64 bg-purple-glow/20 rounded-full blur-3xl animate-float" style="background-color: hsl(var(--purple-glow) / 0.2); filter: blur(64px);"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-light/20 rounded-full blur-3xl animate-float" style="background-color: hsl(var(--purple-light) / 0.2); filter: blur(64px); animation-delay: 2s;"></div>
+    
+    <!-- Content -->
+    <div class="container relative z-10">
+      <div class="max-w-4xl">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8 animate-slide-up" style="background-color: rgba(255, 255, 255, 0.1);">
+          <svg class="w-4 h-4 text-purple-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: hsl(var(--purple-glow));">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+          </svg>
+          <span class="text-sm text-white/90">Powered by Advanced AI</span>
+        </div>
+        
+        <h1 class="text-6xl md:text-7xl font-bold text-white mb-6 animate-slide-up leading-tight" style="animation-delay: 0.1s;">
+          Let Vastu direct your 2D design into a 3D model
+        </h1>
+        
+        <p class="text-xl text-white/80 mb-10 max-w-2xl animate-slide-up leading-relaxed" style="animation-delay: 0.2s;">
+          AI-powered 2D to 3D conversion and Vastu-compliant design intelligence for architects, designers, and homeowners.
+        </p>
+        
+        <div class="flex gap-4 animate-slide-up" style="animation-delay: 0.3s;">
+          <a href="converter.html" class="btn btn-lg btn-white rounded-full px-8 py-6 text-lg">
+            Get Started
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </a>
+          <a href="vastu.html" class="btn btn-lg btn-outline rounded-full px-8 py-6 text-lg border-white/30 text-white hover:bg-white/10" style="color: white;">
+            Explore Vastu AI
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+      <div class="scroll-indicator-inner">
+        <div class="scroll-indicator-dot"></div>
+      </div>
+    </div>
+  </section>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- About Section -->
+  <section class="py-24 bg-background relative">
+    <div class="container px-6">
+      <div class="grid md:grid-cols-2 gap-16 items-center">
+        <div class="animate-slide-up">
+          <h2 class="text-4xl font-bold mb-6 text-foreground">
+            About VISHWAKARMA AI
+          </h2>
+          <p class="text-lg text-muted-foreground leading-relaxed mb-6">
+            VISHWAKARMA AI bridges the gap between architectural blueprints and immersive 3D visualization. Designed for architects, designers, builders, and homeowners — our AI converts 2D plans into interactive 3D models while ensuring Vastu alignment.
+          </p>
+          <p class="text-lg text-muted-foreground leading-relaxed">
+            Experience the future of architectural design where ancient wisdom meets cutting-edge technology.
+          </p>
+        </div>
+        
+        <div class="relative animate-slide-up" style="animation-delay: 0.2s;">
+          <div class="relative rounded-2xl overflow-hidden shadow-purple border border-purple-light/20">
+            <div class="aspect-video bg-gradient-card flex items-center justify-center">
+              <div class="text-center p-8">
+                <svg class="w-24 h-24 mx-auto mb-4 text-primary animate-float" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                <p class="text-muted-foreground">Blueprint → 3D Wireframe Visualization</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-24 bg-secondary/30 relative">
+    <div class="container px-6">
+      <div class="text-center mb-16 animate-slide-up">
+        <h2 class="text-4xl font-bold mb-4 text-foreground">Core Features</h2>
+        <p class="text-xl text-muted-foreground">Powerful AI tools for modern architecture</p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="feature-card">
+          <div class="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center mb-4" style="box-shadow: var(--shadow-glow);">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">AI 2D → 3D Conversion</h3>
+          <p class="text-muted-foreground leading-relaxed">Transform your 2D floor plans into detailed 3D models with our advanced AI engine in seconds.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center mb-4" style="box-shadow: var(--shadow-glow);">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">Vastu AI Analysis</h3>
+          <p class="text-muted-foreground leading-relaxed">Get comprehensive Vastu compliance scores and intelligent placement recommendations.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center mb-4" style="box-shadow: var(--shadow-glow);">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">Smart Layouts</h3>
+          <p class="text-muted-foreground leading-relaxed">AI-powered suggestions for optimal room placement and architectural flow.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center mb-4" style="box-shadow: var(--shadow-glow);">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">Editable 3D Models</h3>
+          <p class="text-muted-foreground leading-relaxed">Fully interactive and customizable 3D visualizations with real-time rendering.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-24 bg-background relative">
+    <div class="container px-6">
+      <div class="text-center mb-16 animate-slide-up">
+        <h2 class="text-4xl font-bold mb-4 text-foreground">How It Works</h2>
+        <p class="text-xl text-muted-foreground">Three simple steps to transform your designs</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+        <div class="text-center animate-slide-up">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-purple shadow-purple flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+          </div>
+          <div class="text-4xl font-bold text-primary/20 mb-2" style="color: hsl(var(--primary) / 0.2);">01</div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">Upload Your 2D Plan</h3>
+          <p class="text-muted-foreground">Simply drag and drop your architectural blueprint or floor plan.</p>
+        </div>
+        
+        <div class="text-center animate-slide-up" style="animation-delay: 0.1s;">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-purple shadow-purple flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+            </svg>
+          </div>
+          <div class="text-4xl font-bold text-primary/20 mb-2" style="color: hsl(var(--primary) / 0.2);">02</div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">AI Analyzes + Generates</h3>
+          <p class="text-muted-foreground">Our AI processes your design and creates a detailed 3D model.</p>
+        </div>
+        
+        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-purple shadow-purple flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <div class="text-4xl font-bold text-primary/20 mb-2" style="color: hsl(var(--primary) / 0.2);">03</div>
+          <h3 class="text-xl font-bold mb-3 text-foreground">Explore Your 3D Model</h3>
+          <p class="text-muted-foreground">View, customize, and export your 3D visualization or Vastu report.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 bg-secondary/30 border-t border-border">
+    <div class="container px-6 text-center">
+      <p class="text-muted-foreground">
+        © 2024 VISHWAKARMA AI. Transforming architecture with intelligence.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
 </html>
