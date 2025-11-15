@@ -72,11 +72,29 @@ function navigateTo(path) {
 
 // Set active nav link
 function setActiveNavLink() {
-  const currentPath = window.location.pathname;
+  // Get current page filename - works with both file:// and http:// protocols
+  const currentUrl = window.location.href;
+  const currentPage = currentUrl.split('/').pop() || 'index.html';
+  
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
     const href = link.getAttribute('href');
-    if (href === currentPath || (currentPath === '/' && href === '/index.html')) {
+    const linkPage = href.split('/').pop();
+    
+    // Check if current page matches link page
+    if (currentPage === linkPage || 
+        (currentPage === '' && linkPage === 'index.html') ||
+        (currentPage === 'index.html' && linkPage === 'index.html')) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+  
+  // Also handle the Login button active state
+  const loginLinks = document.querySelectorAll('a[href="login.html"]');
+  loginLinks.forEach(link => {
+    if (currentPage === 'login.html') {
       link.classList.add('active');
     } else {
       link.classList.remove('active');
@@ -243,8 +261,17 @@ function initConverter() {
   const uploadArea = document.querySelector('.file-upload-area');
   const processingArea = document.querySelector('.processing');
   const fileDisplay = document.querySelector('.file-display');
+  const uploadLabel = document.querySelector('label[for="file-upload"]');
   
   if (!fileInput) return;
+  
+  // Make the upload area clickable
+  if (uploadLabel && uploadArea) {
+    uploadLabel.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.click();
+    });
+  }
   
   // Handle file input change
   fileInput.addEventListener('change', (e) => {
@@ -259,14 +286,29 @@ function initConverter() {
     }
     
     // Show processing state
-    if (uploadContainer) uploadContainer.style.display = 'none';
-    if (processingArea) processingArea.style.display = 'flex';
-    if (fileDisplay) fileDisplay.style.display = 'none';
+    if (uploadContainer) {
+      uploadContainer.style.display = 'none';
+      uploadContainer.classList.add('hidden');
+    }
+    if (processingArea) {
+      processingArea.style.display = 'flex';
+      processingArea.classList.remove('hidden');
+    }
+    if (fileDisplay) {
+      fileDisplay.style.display = 'none';
+      fileDisplay.classList.add('hidden');
+    }
     
     // Simulate processing
     setTimeout(() => {
-      if (processingArea) processingArea.style.display = 'none';
-      if (fileDisplay) fileDisplay.style.display = 'block';
+      if (processingArea) {
+        processingArea.style.display = 'none';
+        processingArea.classList.add('hidden');
+      }
+      if (fileDisplay) {
+        fileDisplay.style.display = 'block';
+        fileDisplay.classList.remove('hidden');
+      }
       
       Toast.show('3D Model Generated!', 'Your 2D plan has been converted successfully.');
       
@@ -323,8 +365,14 @@ function initVastuAI() {
     analyzeBtn.textContent = 'Analyzing...';
     
     setTimeout(() => {
-      if (uploadArea) uploadArea.style.display = 'none';
-      if (resultsArea) resultsArea.style.display = 'block';
+      if (uploadArea) {
+        uploadArea.style.display = 'none';
+        uploadArea.classList.add('hidden');
+      }
+      if (resultsArea) {
+        resultsArea.style.display = 'block';
+        resultsArea.classList.remove('hidden');
+      }
       
       Toast.show('Vastu Analysis Complete!', 'Your design has been analyzed for Vastu compliance.');
       
@@ -340,6 +388,7 @@ function initLogin() {
   
   if (!loginForm) return;
   
+  // Handle form submission
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -371,6 +420,42 @@ function initLogin() {
       submitBtn.textContent = 'Sign In';
     }
   });
+  
+  // Handle social login buttons (placeholder for now)
+  const googleBtn = document.querySelector('button:has(svg[viewBox="0 0 24 24"]:first-child)');
+  const githubBtn = document.querySelector('button:has(svg[fill="currentColor"][viewBox="0 0 24 24"])');
+  
+  // Alternative: find buttons by their text content
+  const allButtons = document.querySelectorAll('.btn');
+  allButtons.forEach(btn => {
+    if (btn.textContent.includes('Google')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        Toast.show('Info', 'Google login will be available soon. Please use email login for now.');
+      });
+    } else if (btn.textContent.includes('GitHub')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        Toast.show('Info', 'GitHub login will be available soon. Please use email login for now.');
+      });
+    }
+  });
+  
+  // Handle "Sign up" and "Forgot password" links
+  const allLinks = document.querySelectorAll('a[href="#"]');
+  allLinks.forEach(link => {
+    if (link.textContent.includes('Sign up')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        Toast.show('Info', 'Sign up feature will be available soon. Please use email login for now.');
+      });
+    } else if (link.textContent.includes('Forgot password')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        Toast.show('Info', 'Password reset feature will be available soon. Please contact support.');
+      });
+    }
+  });
 }
 
 // Initialize app when DOM is ready
@@ -382,13 +467,15 @@ document.addEventListener('DOMContentLoaded', () => {
   setActiveNavLink();
   
   // Initialize page-specific logic based on current page
-  const currentPath = window.location.pathname;
+  // Get current page filename - works with both file:// and http:// protocols
+  const currentUrl = window.location.href;
+  const currentPage = currentUrl.split('/').pop() || 'index.html';
   
-  if (currentPath.includes('converter.html') || currentPath.includes('converter')) {
+  if (currentPage === 'converter.html' || currentUrl.includes('converter.html')) {
     initConverter();
-  } else if (currentPath.includes('vastu.html') || currentPath.includes('vastu')) {
+  } else if (currentPage === 'vastu.html' || currentUrl.includes('vastu.html')) {
     initVastuAI();
-  } else if (currentPath.includes('login.html') || currentPath.includes('login')) {
+  } else if (currentPage === 'login.html' || currentUrl.includes('login.html')) {
     initLogin();
   }
   
