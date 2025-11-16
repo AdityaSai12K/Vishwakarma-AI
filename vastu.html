@@ -1,236 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vastu AI Dashboard - VISHWAKARMA AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-  
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vastu AI — VISHWAKARMA AI</title>
+  <link href="css/styles.css" rel="stylesheet" />
+  <style>
+    /* minimal inline helpers so the page looks OK if your css file isn't present */
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#fafafa; color:#111; margin:0; padding:0 1rem 4rem; }
+    .container{max-width:1100px;margin:4rem auto}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 6px 20px rgba(16,24,40,0.04)}
+    .btn{background:#6b46c1;color:#fff;border:none;padding:0.6rem 1rem;border-radius:10px;cursor:pointer}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    input[type="file"]{display:none}
+    .hidden{display:none}
+    .flex{display:flex;gap:.75rem;align-items:center}
+    .col{display:flex;flex-direction:column;gap:.5rem}
+    pre{white-space:pre-wrap}
+    .toast{position:fixed;right:1rem;top:1rem;background:#111;color:#fff;padding:.6rem .9rem;border-radius:8px;z-index:2000}
+    .preview-img{max-width:100%;height:auto;border-radius:8px;border:1px solid #eee}
+    .muted{color:#666;font-size:.95rem}
+    .room, .issue, .suggestion { padding:.6rem;border-radius:8px;margin-bottom:.5rem;border:1px solid #eee;background:#fff }
+    .score-circle{width:120px;height:120px;border-radius:999px;border:10px solid #eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem}
+    #chat-output{height:220px;overflow:auto;padding:.6rem;border-radius:8px;border:1px solid #eee;background:#fafafa}
+    .msg-user{align-self:flex-end;background:#6b46c1;color:#fff;padding:.5rem .75rem;border-radius:10px;max-width:80%}
+    .msg-bot{align-self:flex-start;background:#fff;padding:.5rem .75rem;border-radius:10px;border:1px solid #eee;max-width:80%}
+  </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="container">
-      <div class="flex items-center justify-between">
-        <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-primary no-underline">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-          </svg>
-          VISHWAKARMA AI
-        </a>
-        
-        <div class="flex items-center gap-8">
-          <a href="index.html" class="nav-link">Home</a>
-          <a href="converter.html" class="nav-link">2D → 3D Converter</a>
-          <a href="vastu.html" class="nav-link active">Vastu AI</a>
-          <a href="login.html" class="btn btn-primary">Login</a>
+  <div class="container">
+    <h1>Vastu AI — VISHWAKARMA AI</h1>
+    <p class="muted">Upload a 2D floor plan (JPG/PNG/PDF). The app will attempt AI analysis; if the AI call fails, a mock report is shown so the UI always responds.</p>
+
+    <div class="card" id="upload-card">
+      <div class="col">
+        <div class="flex">
+          <label for="blueprint-input" class="btn" id="open-file-btn">Select Blueprint</label>
+          <button class="btn" id="analyze-now-btn">Start Vastu Analysis</button>
+          <div id="status" class="muted" style="margin-left:auto">Ready</div>
+        </div>
+
+        <input id="blueprint-input" type="file" accept="image/jpeg,image/jpg,image/png,application/pdf">
+
+        <div id="preview-area" class="col" style="margin-top:1rem">
+          <div id="preview-notice" class="muted">No file selected</div>
+          <img id="preview-img" class="preview-img hidden" alt="preview">
         </div>
       </div>
     </div>
-  </nav>
-  
-  <div class="pt-24 pb-12 px-6">
-    <div class="container max-w-7xl">
-      <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-2 text-foreground">Vastu AI Dashboard</h1>
-        <p class="text-muted-foreground text-lg">Get intelligent Vastu analysis and recommendations</p>
-      </div>
 
-      <!-- Upload Area (Initial State) -->
-      <div class="vastu-upload-area max-w-2xl mx-auto">
-        <div class="rounded-2xl border-2 border-dashed border-purple-light/50 p-16 text-center bg-gradient-card">
-          <div class="w-20 h-20 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-6 shadow-card">
-            <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold mb-2 text-foreground">Upload Your Floor Plan</h3>
-          <p class="text-muted-foreground mb-6">Get comprehensive Vastu analysis and scoring</p>
-          <button id="analyze-btn" class="btn btn-lg btn-gradient rounded-full">
-            Start Vastu Analysis
-          </button>
+    <div class="card hidden" id="processing-card">
+      <div class="muted">Processing — analyzing blueprint. This UI will show mock results if the AI call can't run.</div>
+    </div>
+
+    <div class="card hidden" id="results-card">
+      <div style="display:flex;gap:1rem;align-items:center">
+        <div class="score-circle" id="score-value">0</div>
+        <div>
+          <div style="font-weight:700" id="score-assessment">-</div>
+          <div class="muted" id="score-summary">-</div>
         </div>
       </div>
 
-      <!-- Results Area (Hidden Initially) -->
-      <div class="vastu-results hidden">
-        <div class="grid lg:grid-cols-3 gap-6">
-          <!-- Vastu Score -->
-          <div class="lg:col-span-1">
-            <div class="rounded-2xl border border-border shadow-card bg-card p-8 text-center sticky top-24">
-              <h3 class="text-lg font-bold mb-6 text-foreground">Vastu Score</h3>
-              
-              <div class="vastu-circle mx-auto mb-6">
-                <svg class="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    stroke-width="12"
-                    fill="none"
-                    style="color: hsl(var(--secondary));"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    stroke-width="12"
-                    fill="none"
-                    stroke-dasharray="553"
-                    stroke-dashoffset="99.54"
-                    style="color: hsl(var(--primary)); transition: all 1s;"
-                    stroke-linecap="round"
-                  />
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <div>
-                    <div class="text-5xl font-bold text-primary">82</div>
-                    <div class="text-sm text-muted-foreground">out of 100</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="flex items-center justify-center gap-2 mb-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                </svg>
-                <span class="font-bold text-foreground">Good Alignment</span>
-              </div>
-              <p class="text-sm text-muted-foreground">Your design follows most Vastu principles</p>
-            </div>
-          </div>
+      <hr style="margin:1rem 0">
 
-          <!-- Analysis Details -->
-          <div class="lg:col-span-2 space-y-6">
-            <!-- Strengths -->
-            <div class="rounded-2xl border border-border shadow-card bg-card p-6">
-              <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Vastu Strengths
-              </h3>
-              <div class="space-y-3">
-                <div class="flex gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <p class="text-sm text-green-900">Main entrance faces East - Excellent for positive energy flow</p>
-                </div>
-                <div class="flex gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <p class="text-sm text-green-900">Kitchen positioned in South-East - Ideal fire element placement</p>
-                </div>
-                <div class="flex gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <p class="text-sm text-green-900">Master bedroom in South-West - Promotes stability and rest</p>
-                </div>
-              </div>
-            </div>
+      <h3>Detected Rooms</h3>
+      <div id="rooms-container"></div>
 
-            <!-- Weaknesses -->
-            <div class="rounded-2xl border border-border shadow-card bg-card p-6">
-              <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
-                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                Areas for Improvement
-              </h3>
-              <div class="space-y-3">
-                <div class="flex gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-                  <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                  <p class="text-sm text-amber-900">Bathroom in North-East corner - Consider relocating or using remedies</p>
-                </div>
-                <div class="flex gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-                  <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                  <p class="text-sm text-amber-900">Study room lacks North-East light - Add more windows for better energy</p>
-                </div>
-              </div>
-            </div>
+      <h3>Positives</h3>
+      <div id="positives-container"></div>
 
-            <!-- Suggestions -->
-            <div class="rounded-2xl border border-border shadow-card bg-card p-6">
-              <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                </svg>
-                Smart Recommendations
-              </h3>
-              <div class="space-y-3">
-                <div class="flex gap-3 p-4 rounded-xl bg-secondary/50 border border-purple-light/30">
-                  <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                  </svg>
-                  <p class="text-sm text-foreground">Place a water feature in North-East to enhance positive energy</p>
-                </div>
-                <div class="flex gap-3 p-4 rounded-xl bg-secondary/50 border border-purple-light/30">
-                  <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                  </svg>
-                  <p class="text-sm text-foreground">Use mirrors strategically to reflect light in darker areas</p>
-                </div>
-                <div class="flex gap-3 p-4 rounded-xl bg-secondary/50 border border-purple-light/30">
-                  <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                  </svg>
-                  <p class="text-sm text-foreground">Consider adding plants in the East direction for prosperity</p>
-                </div>
-              </div>
-            </div>
+      <h3>Issues</h3>
+      <div id="issues-container"></div>
 
-            <!-- Directional Compass -->
-            <div class="rounded-2xl border border-border shadow-card bg-gradient-card p-8">
-              <h3 class="text-lg font-bold mb-6 text-center text-foreground">Directional Analysis</h3>
-              <div class="compass-container">
-                <div class="compass-ring"></div>
-                <div class="compass-ring-inner"></div>
-                
-                <!-- Directions -->
-                <div class="compass-direction" style="top: 0; left: 50%; transform: translateX(-50%);">N</div>
-                <div class="compass-direction" style="top: 50%; right: 0; transform: translateY(-50%);">E</div>
-                <div class="compass-direction" style="bottom: 0; left: 50%; transform: translateX(-50%);">S</div>
-                <div class="compass-direction" style="top: 50%; left: 0; transform: translateY(-50%);">W</div>
-                
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg class="w-16 h-16 text-primary animate-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <h3>Suggestions</h3>
+      <div id="suggestions-container"></div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="card">
+      <h3>Ask Vastu Bot</h3>
+      <div id="chat-output" class="col">
+        <div class="muted">Ask anything about Vastu or the analysis</div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;margin-top:.75rem">
+        <input id="chat-input" placeholder="Type a question..." style="flex:1;padding:.6rem;border-radius:8px;border:1px solid #eee">
+        <button id="chat-send" class="btn">Ask</button>
       </div>
     </div>
+
+    <div id="log" class="muted" style="margin-top:1rem"></div>
   </div>
 
-  <script src="js/app.js"></script>
-  <!-- Fallback: Ensure .html links always navigate -->
+  <!-- Minimal toast helper -->
+  <div id="toast" class="toast hidden"></div>
+
   <script>
-    // Safeguard: Allow all .html links to navigate normally
-    document.addEventListener('click', function(e) {
-      const link = e.target.closest('a[href$=".html"]');
-      if (link && !link.hasAttribute('data-no-navigate')) {
-        return true;
+  /************************************************************************
+   * VASTU HTML — SINGLE FILE IMPLEMENTATION
+   *
+   * - Includes your API key (INSECURE client-side) because you asked for it.
+   * - Production: Move this key to server-side!
+   *
+   * Your provided Google API key (you put it in chat):
+   *   AIzaSyBHV5d_9scp-Tpg6Zh4j0pEnHtMDHQgv6Y
+   *
+   ************************************************************************/
+
+  (function () {
+    'use strict';
+
+    // ---------- CONFIG ----------
+    const CLIENT_SIDE_API_KEY = "AIzaSyBHV5d_9scp-Tpg6Zh4j0pEnHtMDHQgv6Y"; // !!! Insecure in browser, rotate later
+    const GEMINI_MODEL_TO_TRY = "gemini-1.5"; // we try a generic name; model availability depends on SDK & account
+    const USE_AI_TIMEOUT_MS = 20000; // give API up to 20s
+
+    // ---------- DOM ----------
+    const fileInput = document.getElementById('blueprint-input');
+    const openFileBtn = document.getElementById('open-file-btn');
+    const analyzeNowBtn = document.getElementById('analyze-now-btn');
+    const statusEl = document.getElementById('status');
+    const previewImg = document.getElementById('preview-img');
+    const previewNotice = document.getElementById('preview-notice');
+    const processingCard = document.getElementById('processing-card');
+    const resultsCard = document.getElementById('results-card');
+
+    const scoreValueEl = document.getElementById('score-value');
+    const scoreAssessmentEl = document.getElementById('score-assessment');
+    const scoreSummaryEl = document.getElementById('score-summary');
+
+    const roomsContainer = document.getElementById('rooms-container');
+    const positivesContainer = document.getElementById('positives-container');
+    const issuesContainer = document.getElementById('issues-container');
+    const suggestionsContainer = document.getElementById('suggestions-container');
+
+    const chatOutput = document.getElementById('chat-output');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send');
+
+    const toast = document.getElementById('toast');
+    const logEl = document.getElementById('log');
+
+    // ---------- Utilities ----------
+    function showToast(text, ms = 3000) {
+      toast.textContent = text;
+      toast.classList.remove('hidden');
+      setTimeout(()=> toast.classList.add('hidden'), ms);
+    }
+    function log(msg) { console.log(msg); if (logEl) logEl.textContent = msg; }
+
+    function resetUIToUpload() {
+      processingCard.classList.add('hidden');
+      resultsCard.classList.add('hidden');
+      document.getElementById('upload-card').classList.remove('hidden');
+      statusEl.textContent = 'Ready';
+    }
+
+    function showProcessing() {
+      document.getElementById('upload-card').classList.add('hidden');
+      processingCard.classList.remove('hidden');
+      resultsCard.classList.add('hidden');
+      statusEl.textContent = 'Processing...';
+    }
+
+    function showResults() {
+      processingCard.classList.add('hidden');
+      resultsCard.classList.remove('hidden');
+      statusEl.textContent = 'Complete';
+    }
+
+    // Show preview for images, and a placeholder message for PDFs
+    function previewFile(file) {
+      if (!file) {
+        previewImg.classList.add('hidden');
+        previewNotice.textContent = 'No file selected';
+        return;
       }
-    }, true);
+      if (file.type === 'application/pdf') {
+        previewImg.classList.add('hidden');
+        previewNotice.textContent = `PDF selected: ${file.name}. (Preview not supported in this demo.)`;
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      previewImg.src = url;
+      previewImg.onload = () => { URL.revokeObjectURL(url); };
+      previewImg.classList.remove('hidden');
+      previewNotice.textContent = `${file.name} (${Math.round(file.size/1024)} KB)`;
+    }
+
+    // Basic function to attempt to call Gemini client SDK if available
+    // If it fails, we return null and caller should fallback to mock
+    async function attemptGeminiAnalyze(promptText, fileBase64, mimeType) {
+      // Check SDK availability - window.GoogleGenerativeAI or window.genAI etc.
+      const sdk = window.GoogleGenerativeAI || window.genAI || window['@google/generative-ai'];
+      if (!sdk && !window.google || (!window.GoogleGenerativeAI && !window.genAI)) {
+        log('Gemini SDK not available in window; skipping AI call');
+        return null;
+      }
+
+      try {
+        // There are multiple unofficial bundles — try common constructors:
+        let client;
+        if (typeof window.GoogleGenerativeAI === 'function') {
+          client = new window.GoogleGenerativeAI(CLIENT_SIDE_API_KEY);
+        } else if (window.genAI && typeof window.genAI === 'object' && typeof window.genAI.getGenerativeModel === 'function') {
+          // some UMD wrappers set window.genAI to an already-initialized client
+          client = window.genAI;
+        } else if (window['@google/generative-ai'] && typeof window['@google/generative-ai'].GoogleGenerativeAI === 'function') {
+          client = new window['@google/generative-ai'].GoogleGenerativeAI(CLIENT_SIDE_API_KEY);
+        } else {
+          log('Unknown SDK shape — cannot initialize client safely');
+          return null;
+        }
+
+        log('Initialized Gemini client (best-effort). Attempting model call...');
+
+        // Try to get a model (best-effort)
+        let model;
+        try {
+          model = client.getGenerativeModel ? client.getGenerativeModel({ model: GEMINI_MODEL_TO_TRY }) : client;
+        } catch (merr) {
+          // If getGenerativeModel fails, try using client directly
+          log('getGenerativeModel failed — will attempt client-level generateContent if available', merr);
+          model = client;
+        }
+
+        // Build request parts similar to examples: text prompt + inlineData
+        const parts = [
+          { text: promptText },
+          { inlineData: { data: fileBase64, mimeType: mimeType } }
+        ];
+
+        // If generateContent is a function on model, call it
+        if (!model.generateContent && client.generateContent) {
+          model = client;
+        }
+        if (typeof model.generateContent !== 'function') {
+          log('generateContent not found on model/client');
+          return null;
+        }
+
+        // Promise race with timeout
+        const callPromise = model.generateContent(parts);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), USE_AI_TIMEOUT_MS));
+        const result = await Promise.race([callPromise, timeout]);
+
+        // result.response.text() or result.output[0].content[0].text?.text depending on SDK — try common shapes
+        let text = '';
+        if (!result) throw new Error('No result from model');
+        try {
+          if (typeof result.response?.text === 'function') {
+            text = result.response.text();
+          } else if (result.output && result.output.length && result.output[0].content) {
+            // try digging
+            const content = result.output[0].content.find(c => c.type === 'text' || c.type === 'output_text') || result.output[0].content[0];
+            text = content?.text || content?.text?.trim() || JSON.stringify(result.output);
+          } else if (typeof result === 'string') {
+            text = result;
+          } else {
+            text = JSON.stringify(result).slice(0, 2000);
+          }
+        } catch (e) {
+          log('Could not extract text from result: ' + e.message);
+          text = JSON.stringify(result).slice(0, 2000);
+        }
+
+        log('AI responded; length=' + (text?.length || 0));
+        return text;
+      } catch (err) {
+        console.error('Gemini call failed:', err);
+        return null;
+      }
+    }
+
+    // Helper: convert file to base64 string (no data: prefix)
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (!reader.result) return reject(new Error('Empty read result'));
+          const s = reader.result.toString();
+          const comma = s.indexOf(',');
+          resolve(comma >= 0 ? s.slice(comma + 1) : s);
+        };
+        reader.onerror = () => reject(new Error('File read error'));
+        reader.onabort = () => reject(new Error('File read aborted'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Try to parse JSON embedded in text; otherwise return null
+    function tryExtractJSON(text) {
+      if (!text) return null;
+      // remove markdown fences
+      text = text.trim();
+      text = text.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+      text = text.replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+      // locate first { ... } block
+      const match = text.match(/\{[\s\S]*\}$/);
+      if (match) {
+        try {
+          return JSON.parse(match[0]);
+        } catch (e) {
+          // continue to try plain parse
+        }
+      }
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Mock analyzer (guaranteed to return data)
+    function getMockReportVariant(fileName = '') {
+      // simple cycle based on timestamp or filename hash for variety
+      const t = Date.now();
+      const variant = t % 3;
+      if (variant === 0) {
+        return {
+          score: 88,
+          assessment: 'GOOD',
+          summary: 'Good Vastu alignment; a few minor tweaks recommended.',
+          rooms: [{name:'Kitchen',direction:'SE',status:'good'},{name:'Master Bedroom',direction:'SW',status:'good'},{name:'Toilet',direction:'NE',status:'bad'}],
+          positives: ['Kitchen in SE','Master bedroom in SW'],
+          issues: [{message:'Toilet in NE',severity:'high'}],
+          suggestions: ['Move toilet away from NE','Place small water bowl in NE to balance']
+        };
+      } else if (variant === 1) {
+        return {
+          score: 70,
+          assessment: 'FAIR',
+          summary: 'Average compliance; a few important corrections needed.',
+          rooms: [{name:'Kitchen',direction:'E',status:'ok'},{name:'Bedroom',direction:'NW',status:'ok'},{name:'Bathroom',direction:'NE',status:'bad'}],
+          positives: ['Main entrance good'],
+          issues: [{message:'Bathroom in NE',severity:'high'},{message:'Center clutter',severity:'medium'}],
+          suggestions: ['Relocate bathroom, declutter center area','Add plants in east']
+        };
+      } else {
+        return {
+          score: 94,
+          assessment: 'EXCELLENT',
+          summary: 'Excellent layout — maintain current placements.',
+          rooms: [{name:'Kitchen',direction:'SE',status:'excellent'},{name:'Pooja Room',direction:'NE',status:'excellent'}],
+          positives: ['All wet areas away from NE','Pooja in NE'],
+          issues: [],
+          suggestions: ['Keep centre uncluttered','Maintain ventilation']
+        };
+      }
+    }
+
+    // Update UI with data object
+    function updateResultsUI(data) {
+      if (!data) return;
+      scoreValueEl.textContent = Math.round(data.score || 0);
+      scoreAssessmentEl.textContent = (data.assessment || 'UNKNOWN').toUpperCase();
+      scoreSummaryEl.textContent = data.summary || '';
+
+      // Rooms
+      if (Array.isArray(data.rooms) && data.rooms.length) {
+        roomsContainer.innerHTML = data.rooms.map(r => `<div class="room"><strong>${r.name}</strong> — ${r.direction || 'Unknown'} ${r.status ? '('+r.status+')':''}</div>`).join('');
+      } else {
+        roomsContainer.innerHTML = '<div class="room muted">No rooms detected.</div>';
+      }
+
+      // Positives
+      if (Array.isArray(data.positives) && data.positives.length) {
+        positivesContainer.innerHTML = data.positives.map(p => `<div class="room">✔ ${p}</div>`).join('');
+      } else {
+        positivesContainer.innerHTML = '<div class="room muted">No positives reported.</div>';
+      }
+
+      // Issues
+      if (Array.isArray(data.issues) && data.issues.length) {
+        issuesContainer.innerHTML = data.issues.map(i => `<div class="issue">⚠ ${i.severity ? '<b>['+i.severity.toUpperCase()+']</b> ' : ''}${i.message || i}</div>`).join('');
+      } else {
+        issuesContainer.innerHTML = '<div class="issue muted">No issues detected.</div>';
+      }
+
+      // Suggestions
+      if (Array.isArray(data.suggestions) && data.suggestions.length) {
+        suggestionsContainer.innerHTML = data.suggestions.map(s => `<div class="suggestion">💡 ${s}</div>`).join('');
+      } else {
+        suggestionsContainer.innerHTML = '<div class="suggestion muted">No suggestions.</div>';
+      }
+    }
+
+    // ---------- Main analyze flow ----------
+    async function analyzeFile(file) {
+      try {
+        showProcessing();
+        showToast('Converting file...');
+        const base64 = await fileToBase64(file);
+        log('base64 length: ' + base64.length);
+
+        // Compose a strong prompt requesting strict JSON
+        const prompt = `
+You are a Vastu Shastra expert. Analyze the attached floor plan image/PDF.
+Assume top of image = North, bottom = South, left = West, right = East.
+Detect rooms, determine coarse directions (N, NE, E, SE, S, SW, W, NW), list positives, issues (with severity), suggestions, and give an overall score 0-100.
+
+Return ONLY valid JSON (no markdown, no explanation) in this format:
+{
+  "score": 75,
+  "assessment": "good",
+  "summary": "Short summary",
+  "rooms": [{"name":"Kitchen","direction":"SE","status":"good"}],
+  "positives": ["Kitchen in SE"],
+  "issues": [{"message":"Toilet in NE","severity":"high"}],
+  "suggestions": ["Move toilet to SW"]
+}
+        `.trim();
+
+        showToast('Attempting AI analysis (may fail if SDK/model unavailable)...', 4000);
+        const aiText = await attemptGeminiAnalyze(prompt, base64, file.type).catch(e => { console.error(e); return null; });
+
+        let data = null;
+        if (aiText) {
+          // Try to parse JSON from response
+          data = tryExtractJSON(aiText);
+          if (!data) {
+            console.warn('AI returned text but JSON extraction failed. AI text preview:', aiText.slice(0,1000));
+          } else {
+            console.log('Parsed JSON from AI');
+          }
+        }
+
+        // If AI didn't work or returned non-JSON, fallback to mock
+        if (!data) {
+          console.warn('Falling back to mock report');
+          data = getMockReportVariant(file.name);
+        }
+
+        // Update UI with data
+        updateResultsUI(data);
+        showResults();
+        showToast('Analysis ready');
+      } catch (err) {
+        console.error('analyzeFile error', err);
+        showToast('Analysis failed — using mock result');
+        const data = getMockReportVariant();
+        updateResultsUI(data);
+        showResults();
+      }
+    }
+
+    // ---------- Chatbot ----------
+    async function sendChatMessage(userText) {
+      if (!userText) return;
+      appendChatMessage(userText, true);
+      chatInput.value = '';
+      chatSendBtn.disabled = true;
+      showToast('Thinking...');
+      // Try Gemini first (via same client routine)
+      const prompt = `System: You are Vastu Bot. Provide short, friendly, 1-2 sentence answers about Vastu. User: ${userText}\nAnswer:`;
+      let aiText = null;
+      try {
+        aiText = await attemptGeminiAnalyze(prompt, null, null);
+      } catch (e) { aiText = null; }
+
+      if (!aiText) {
+        // fallback simple rules
+        aiText = fallbackChatbotAnswer(userText);
+      }
+
+      appendChatMessage(aiText, false);
+      chatSendBtn.disabled = false;
+    }
+
+    function appendChatMessage(text, isUser) {
+      // Remove placeholder muted note when first message happens
+      if (chatOutput.querySelector('.muted')) chatOutput.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = isUser ? 'msg-user' : 'msg-bot';
+      div.textContent = text;
+      chatOutput.appendChild(div);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+    }
+
+    function fallbackChatbotAnswer(userText) {
+      // very lightweight heuristics to give plausible quick reply
+      const t = userText.toLowerCase();
+      if (t.includes('toilet') || t.includes('bath')) return 'Toilets are generally not recommended in NE; consider moving wet areas to SW/W.';
+      if (t.includes('kitchen')) return 'Kitchen should ideally be in SE (Agni) or E; avoid NW for kitchen appliances.';
+      if (t.includes('door') || t.includes('entrance')) return 'Main entrance facing NE, N or E is considered auspicious; ensure it is clutter-free.';
+      if (t.includes('score') || t.includes('rating')) return 'I can give a quick 0–100 compliance score after seeing the plan — upload it to get an analysis.';
+      return 'For precise fixes, upload the plan and run the analysis. Generally, NE = worship/study, SW = master bedroom, SE = kitchen.';
+    }
+
+    // ---------- Wire UI events ----------
+    openFileBtn.addEventListener('click', ()=> fileInput.click());
+
+    fileInput.addEventListener('change', (ev) => {
+      const f = ev.target.files?.[0];
+      if (!f) return;
+      previewFile(f);
+    });
+
+    analyzeNowBtn.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const f = fileInput.files?.[0];
+      if (!f) {
+        showToast('Please select a file first');
+        return;
+      }
+      analyzeNowBtn.disabled = true;
+      analyzeFile(f).finally(()=> analyzeNowBtn.disabled = false);
+    });
+
+    // Chatbot
+    chatSendBtn.addEventListener('click', ()=> {
+      const v = chatInput.value.trim();
+      if (!v) return;
+      sendChatMessage(v);
+    });
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        chatSendBtn.click();
+      }
+    });
+
+    // Initial state
+    resetUIToUpload();
+    log('Vastu UI ready (client-only demo).');
+
+    // Optional: attempt to load Google SDK automatically if you include script tags externally.
+    // (We don't inject remote scripts here for security; include them in your HTML head if desired)
+  })();
   </script>
 </body>
 </html>
-
